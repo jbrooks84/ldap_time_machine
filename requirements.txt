@@ -1,0 +1,13 @@
+# Runtime dependencies. Development extras live in pyproject.toml
+# ([project.optional-dependencies].dev) — install with:
+#
+#   pip install -e ".[dev]"
+#
+# The directory itself is queried through the system `ldapsearch` binary,
+# which is not a Python package:
+#
+#   Debian/Ubuntu   apt install ldap-utils
+#   RHEL/Fedora     dnf install openldap-clients
+#   macOS           already installed
+PyYAML>=5.4
+matplotlib>=3.3

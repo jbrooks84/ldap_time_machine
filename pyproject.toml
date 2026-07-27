@@ -1,0 +1,107 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ldap-time-machine"
+# Single-sourced from ltm/_version.py; see [tool.setuptools.dynamic] below.
+dynamic = ["version"]
+description = "Daily LDAP directory snapshots in SQLite, with change tracking and an HTML email report."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "Apache-2.0" }
+keywords = ["ldap", "active-directory", "openldap", "directory", "reporting", "sqlite"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: System :: Systems Administration",
+    "Topic :: System :: Monitoring",
+]
+dependencies = [
+    "PyYAML>=5.4",
+    "matplotlib>=3.3",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "ruff>=0.6",
+    "pre-commit>=3.0",
+]
+
+[project.scripts]
+ldap-time-machine = "ltm.cli:main"
+
+[tool.setuptools]
+packages = ["ltm"]
+
+[tool.setuptools.dynamic]
+# Read statically from the module, so the version can never drift
+# between the package metadata and what the code reports at runtime.
+version = { attr = "ltm._version.__version__" }
+
+# ── Ruff ──────────────────────────────────────────────────────────
+[tool.ruff]
+line-length = 88
+target-version = "py39"
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # import sorting
+    "B",    # bugbear
+    "C4",   # comprehensions
+    "UP",   # pyupgrade
+    "SIM",  # simplify
+    "RUF",  # ruff-specific
+]
+ignore = [
+    # The report module builds HTML by concatenation; long f-strings there are
+    # more readable on one line than wrapped.
+    "E501",
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Tools adjust sys.path before importing the package, so their imports cannot
+# all sit at the top of the file.
+"tools/*.py" = ["E402"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+# ── pytest ────────────────────────────────────────────────────────
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --strict-markers"
+filterwarnings = ["error::DeprecationWarning:ltm.*"]
+
+# ── coverage ──────────────────────────────────────────────────────
+[tool.coverage.run]
+source = ["ltm"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == .__main__.:",
+    "raise NotImplementedError",
+]
+# The suite covers every line and branch today. Keeping the gate at 100 means
+# new code arrives with its tests rather than eroding coverage a commit at a
+# time — which is the only way it ever erodes.
+fail_under = 100

@@ -1,0 +1,187 @@
+# LDAP Time Machine — configuration
+#
+# Copy to config.yml (in the repo root) or to
+# ~/.config/ldap-time-machine/config.yml, then edit. Set $LTM_CONFIG to point
+# somewhere else entirely if you prefer.
+#
+# Everything here has a default, so you only need the keys you want to change.
+# In practice that is ldap.server and ldap.base_dn, plus report.org_name.
+#
+# Credentials do NOT live here — see credentials.example.yml.
+
+ldap:
+  # Which directory this is. Picks a default search filter and attribute map:
+  #   active_directory  Microsoft AD (default)
+  #   openldap          OpenLDAP with inetOrgPerson
+  #   generic           RFC 4519 attributes only
+  flavor: active_directory
+
+  # ldaps:// is TLS on port 636. For ldap:// on 389, set start_tls: true below.
+  server: ldaps://ldap.example.com
+
+  # The subtree to search.
+  base_dn: DC=example,DC=com
+
+  # Leave unset to use the flavor's default filter. Override to narrow the
+  # population — this is the single most useful knob in the file.
+  #
+  # The active_directory default already excludes computer accounts and
+  # disabled users:
+  #   (&(objectClass=user)(objectClass=person)
+  #     (!(objectClass=computer))
+  #     (!(userAccountControl:1.2.840.113556.1.4.803:=2)))
+  #
+  # A common addition is a data-quality gate requiring an attribute to be set,
+  # which drops service accounts and half-provisioned records:
+  # filter: "(&(objectClass=user)(objectClass=person)(!(objectClass=computer))(!(userAccountControl:1.2.840.113556.1.4.803:=2))(co=*))"
+
+  # Attribute map: role -> the attribute your directory actually uses.
+  # Only list what differs from the flavor preset. Setting a role to null
+  # unmaps it: it is not fetched, and report sections that need it are hidden.
+  attributes: {}
+  #   # Example — an HR-sourced start date from a schema extension. There is no
+  #   # standard attribute for this, so it is unmapped by default. When mapped,
+  #   # tenure uses whichever of it and `created` is earlier.
+  #   start_date: employeeStartDate
+  #   # Example — this directory has no division concept.
+  #   division: null
+
+  # Paged-results page size. Set to 0 to disable paging.
+  page_size: 1000
+
+  # Negotiate StartTLS after connecting. Use with an ldap:// server URI.
+  start_tls: false
+
+  # Extra ldapsearch arguments, if you need them.
+  # extra_args: ["-o", "ldif-wrap=no"]
+
+  # Give up on a search that runs this long, rather than stalling the schedule.
+  timeout_seconds: 120
+
+report:
+  # Used in the seniority heading, e.g. "Acme Seniority". Blank gives a
+  # neutral "Longest Tenured".
+  org_name: ""
+
+  # Subject line prefix.
+  subject_prefix: "LDAP Report"
+
+  # What to call the people in your directory. "Employees", "Staff", "Users".
+  member_label: "Members"
+
+  # Optional link in the email footer — your repo, a runbook, a wiki page.
+  # Give readers somewhere to report a number that looks wrong.
+  project_url: ""
+
+  # The four-tile strip above the trend graph. Off by default because it needs
+  # roughly a month of history before it says anything meaningful.
+  highlights_enabled: false
+
+  # Roles whose changes get their own section in the daily email. Country and
+  # city are rendered together as one "Location Changes" section.
+  tracked_roles:
+    - job_title
+    - department
+    - manager
+    - country
+    - city
+
+  # Row caps for the breakdown tables. Set one to 0 to hide that table.
+  top_n:
+    countries: 25
+    offices: 50
+    departments: 50
+    job_titles: 50
+    divisions: 50
+    business_categories: 50
+    seniority: 100
+
+  # Hard cap on rows in any single people-table (joiners, leavers,
+  # per-attribute changes). The first run against a large directory
+  # otherwise reports every person as a joiner — at 50,000 people that is
+  # a 9 MB email most relays refuse. Everything is still stored; only the
+  # rendering is capped. 0 disables.
+  max_table_rows: 500
+
+  # Rendered reports kept on disk. Dry runs are retained separately so
+  # testing a change cannot evict the real reports.
+  archive_keep: 10
+  archive_keep_dry_run: 5
+
+# ── Noise controls ────────────────────────────────────────────────
+# Everything in `windows` and `guardrails` is about noise, not correctness.
+# These defaults assume a large, busy, imperfect directory: syncs blip and
+# people briefly vanish, attributes oscillate, reorgs rename departments
+# wholesale.
+#
+# On a small or well-curated directory they are too conservative and will
+# delay or hide real changes. To turn each one off:
+#
+#   leaver_confirm_days: 1      report departures the same day
+#   flap_lookback_days: 0       report every change, including oscillations
+#   bulk_rename_min: 0          never roll up; list every move individually
+#   min_ldap_result_ratio: 0    accept any result count, however small
+#   unknown_ratio_limit: 1.0    always show counts exactly as recorded
+#
+# Start permissive, watch a week of reports, and tighten only what is
+# actually noisy. Nothing here changes what is stored — only what is
+# reported — so you can retune at any time without losing history.
+windows:
+  # Calendar days covered by the joiners and changes sections.
+  window_days: 1
+
+  # Consecutive days absent before someone is reported as a leaver. This is
+  # what stops a directory outage from reporting everyone as having resigned.
+  leaver_confirm_days: 7
+
+  # Lookback for suppressing A -> B -> A attribute oscillation.
+  flap_lookback_days: 14
+
+  # People sharing one old -> new department pair before the change is rolled
+  # up into a single row. A reorg otherwise buries every individual move.
+  bulk_rename_min: 3
+
+  # Names listed inline in a rolled-up row before "... and N more".
+  bulk_rename_preview_limit: 10
+
+guardrails:
+  # Abort if today's result count falls below this fraction of the previous
+  # snapshot. A truncated fetch would otherwise be stored as fact, and every
+  # missing person would be reported as a leaver tomorrow.
+  min_ldap_result_ratio: 0.90
+
+  # Hide an attribute's historical counts when more than this fraction were
+  # unknown on that date. The day you start populating an attribute otherwise
+  # looks like explosive growth in every trend column.
+  unknown_ratio_limit: 0.90
+
+  smtp_timeout_seconds: 30
+  db_busy_timeout_seconds: 30
+
+highlights:
+  # Only used when report.highlights_enabled is true.
+  lookback_days: 30
+
+  # Minimum historical headcount before a group is eligible to be the
+  # "biggest mover". Without a floor, a country that went from 1 person to 2
+  # shows +100% and wins the tile every single day.
+  country_min_baseline: 30
+  office_min_baseline: 20
+
+paths:
+  # Relative paths resolve against base_dir. Default: the repo root on a
+  # checkout; $XDG_DATA_HOME/ldap-time-machine (usually
+  # ~/.local/share/ldap-time-machine) when installed as a package, so data
+  # never lands inside site-packages.
+  # base_dir: /var/lib/ldap-time-machine
+  db_file: ldap_time_machine.db
+  log_file: ldap_time_machine.log
+  lock_file: ldap_time_machine.lock
+  trend_graph_file: trend_graph.png
+  email_archive_dir: email_archive
+  credentials_file: ~/.config/ldap-time-machine/credentials.yml
+
+logging:
+  # Daily rotation; how many days to keep.
+  backup_count: 30
+  level: DEBUG
