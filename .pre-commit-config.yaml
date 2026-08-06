@@ -25,6 +25,8 @@ repos:
         args: ["--fix"]
       - id: ruff-format
 
+  # There is no CI on this repository, so these local hooks are the only thing
+  # that runs the gates without someone remembering to.
   - repo: local
     hooks:
       - id: pytest
@@ -33,3 +35,10 @@ repos:
         language: system
         pass_filenames: false
         types: [python]
+
+      - id: doc-links
+        name: check documentation links
+        entry: python .github/check_doc_links.py
+        language: system
+        pass_filenames: false
+        files: \.md$

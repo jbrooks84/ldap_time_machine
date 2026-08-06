@@ -18,15 +18,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Pull request template** carrying a self-review checklist identical to the
   one in `AGENTS.md`, so the standard a contributor reads, an agent applies,
   and a reviewer enforces is a single list.
-- **Documentation link gate** (`.github/check_doc_links.py`, run in CI). Broken
-  relative links and heading anchors now fail the pull request rather than
-  quietly sending the next reader somewhere that no longer exists.
+- **Documentation link check** (`.github/check_doc_links.py`), run as a
+  pre-commit hook and listed in the pull request checklist. Broken relative
+  links and heading anchors now fail loudly rather than quietly sending the
+  next reader somewhere that no longer exists.
 
 ### Changed
 
 - `CONTRIBUTING.md` gains a section on working with AI coding agents, and
   states explicitly that loosening a gate — `fail_under`, a ruff `ignore`,
   `# noqa`, `pragma: no cover` — to get a green run is itself a violation.
+
+### Removed
+
+- **Continuous integration.** The GitHub Actions workflow is gone: no test
+  matrix across Python 3.9–3.13, no lint or formatting check, no package
+  build, and no documentation link check on push or pull request. The gates
+  themselves are unchanged — the 100% coverage floor, ruff, and the link
+  check all still exist and still fail — but running them is now entirely the
+  contributor's responsibility, backed by `pre-commit` locally.
+
+  `AGENTS.md`, `CONTRIBUTING.md`, the pull request template and the Copilot
+  instructions were all reworded accordingly: they no longer say CI enforces
+  anything, and they state plainly that the self-review checklist is the only
+  gate. The documentation link check moved into `.pre-commit-config.yaml` so
+  it keeps running automatically on commit.
+
+  Note that the supported Python range is no longer verified anywhere. Syntax
+  newer than the 3.9 floor will not be caught before release.
 
 ## [1.0.0] — 2026-07-27
 
