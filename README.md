@@ -123,6 +123,7 @@ Then [schedule it](docs/operations.md#scheduling).
 | [Architecture](docs/architecture.md) | How a run works, the database schema, querying it directly, design decisions |
 | [Tools](tools/README.md) | Standalone lookup and exploration utilities |
 | [Contributing](CONTRIBUTING.md) | Development setup and what the project cares about |
+| [AGENTS.md](AGENTS.md) | The hard rules, and which document covers which task — written for AI coding agents, useful to anyone |
 | [Changelog](CHANGELOG.md) | What changed in each release |
 
 `config.example.yml` documents every setting inline.

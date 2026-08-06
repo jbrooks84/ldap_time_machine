@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Contributor and AI-agent guidance.** `AGENTS.md` is now the canonical
+  statement of the project's standards for every tool: numbered hard rules
+  framed as merge blockers, and a task-to-documentation map so a contributor
+  reads the one page that covers what they are changing. `CLAUDE.md` is a thin
+  overlay that imports it, and `.github/copilot-instructions.md` a condensed
+  self-contained copy for Copilot review, which does not follow imports.
+- **Pull request template** carrying a self-review checklist identical to the
+  one in `AGENTS.md`, so the standard a contributor reads, an agent applies,
+  and a reviewer enforces is a single list.
+- **Documentation link gate** (`.github/check_doc_links.py`, run in CI). Broken
+  relative links and heading anchors now fail the pull request rather than
+  quietly sending the next reader somewhere that no longer exists.
+
+### Changed
+
+- `CONTRIBUTING.md` gains a section on working with AI coding agents, and
+  states explicitly that loosening a gate — `fail_under`, a ruff `ignore`,
+  `# noqa`, `pragma: no cover` — to get a green run is itself a violation.
+
 ## [1.0.0] — 2026-07-27
 
 First public release. Generalised from an internal Active Directory reporting
