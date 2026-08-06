@@ -2,6 +2,12 @@
 
 Thanks for taking an interest.
 
+The standards this project holds code to are written down in
+[AGENTS.md](AGENTS.md) — a short index of the hard rules, plus a map from what
+you are doing to the one document that covers it. It is written for AI coding
+agents, but it is the fastest orientation for a human too. This page covers
+setup, what the project cares about and why, and how to release.
+
 ## Getting set up
 
 ```bash
@@ -17,11 +23,35 @@ python3 -m venv .venv
 ```bash
 pytest                    # the full suite; coverage must stay at 100%
 ruff check .
-ruff format .
+ruff format --check .     # a separate gate — lint passing says nothing about it
 ```
 
 `pre-commit install` runs all of that automatically on commit, and CI runs it
-again across Python 3.9 through 3.13.
+again across Python 3.9 through 3.13. The pull request template carries the
+full checklist; it is the same list as the one at the end of
+[AGENTS.md](AGENTS.md#before-opening-a-pr), deliberately, so that there is one
+standard rather than three that drift.
+
+**Do not loosen a gate to get a green run.** Lowering `fail_under`, adding a
+ruff `ignore`, reaching for `# noqa` or `pragma: no cover`, or deleting an
+assertion is itself a larger problem than the failure it hides. If a branch is
+genuinely unreachable, delete the branch.
+
+## Using an AI coding agent
+
+Contributions written with an AI agent are welcome, and are held to exactly
+the same standards as everything else. Two things make that go well:
+
+- **Point it at [AGENTS.md](AGENTS.md) before it starts.** Agents follow
+  written repository guidance far more consistently than they infer house
+  style from surrounding code, and the rules there are the ones a reviewer
+  will block a merge over.
+- **Verify the checklist from real output.** An agent reporting that the suite
+  passes is not the same as the suite passing. Run the three commands above
+  yourself before you open the PR.
+
+Please do not paste generated code you have not read. Review comes down to a
+human vouching for a change, and that part does not transfer.
 
 ## What the project cares about
 

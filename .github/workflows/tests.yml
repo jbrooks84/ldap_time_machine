@@ -52,6 +52,21 @@ jobs:
       - name: Test
         run: pytest --cov=ltm --cov-report=term-missing
 
+  # AGENTS.md sends contributors — human and agent — to a specific page and
+  # heading before they touch a module. A link that no longer resolves sends
+  # them to generic assumptions instead, so docs rot fails the PR.
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Check documentation links
+        run: python .github/check_doc_links.py
+
   package:
     runs-on: ubuntu-latest
     steps:
