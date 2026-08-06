@@ -10,17 +10,21 @@ evidence — with anything sensitive removed. -->
 
 ## Self-review
 
-Run these and tick from the real output, not from memory:
+**There is no CI on this repository** — no check will appear below to catch
+anything you miss. This checklist is the gate. Run the commands and tick from
+the real output, not from memory:
 
 ```bash
-pytest                  # coverage must still be 100%
+pytest                              # coverage must still be 100%
 ruff check .
 ruff format --check .
+python .github/check_doc_links.py
 ```
 
 - [ ] `pytest` passes and coverage is still 100%
 - [ ] `ruff check .` is clean
 - [ ] `ruff format --check .` is clean
+- [ ] `python .github/check_doc_links.py` is clean
 - [ ] No gate was loosened to get there (no lowered `fail_under`, new ruff
       `ignore`, `# noqa`, `pragma: no cover`, or narrowed `testpaths`)
 - [ ] No directory attribute name outside a flavor preset

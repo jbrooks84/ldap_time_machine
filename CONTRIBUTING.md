@@ -21,16 +21,25 @@ python3 -m venv .venv
 ## Before opening a pull request
 
 ```bash
-pytest                    # the full suite; coverage must stay at 100%
+pytest                              # the full suite; coverage must stay at 100%
 ruff check .
-ruff format --check .     # a separate gate — lint passing says nothing about it
+ruff format --check .               # a separate gate — lint says nothing about it
+python .github/check_doc_links.py   # relative links and heading anchors
 ```
 
-`pre-commit install` runs all of that automatically on commit, and CI runs it
-again across Python 3.9 through 3.13. The pull request template carries the
-full checklist; it is the same list as the one at the end of
-[AGENTS.md](AGENTS.md#before-opening-a-pr), deliberately, so that there is one
-standard rather than three that drift.
+**This project has no CI.** Nothing runs after you push, and no check will
+appear on your pull request. `pre-commit install` runs all four of the above
+on every commit and is the only automation there is, so please install it and
+resist `--no-verify`.
+
+That also means the supported Python range — 3.9 and up — is not verified for
+you. If you reach for syntax newer than 3.9, nothing will object until it
+reaches somebody's long-lived server.
+
+The pull request template carries the full checklist; it is the same list as
+the one at the end of [AGENTS.md](AGENTS.md#before-opening-a-pr),
+deliberately, so that there is one standard rather than three that drift.
+Without CI, that checklist is the whole gate.
 
 **Do not loosen a gate to get a green run.** Lowering `fail_under`, adding a
 ruff `ignore`, reaching for `# noqa` or `pragma: no cover`, or deleting an

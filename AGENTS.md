@@ -21,12 +21,20 @@ python3 -m venv .venv
 ```
 
 ```bash
-pytest                  # 510 tests; coverage gate fails the run below 100%
-ruff check .            # lint
-ruff format --check .   # formatting — a separate gate from lint
+pytest                              # coverage gate fails the run below 100%
+ruff check .                        # lint
+ruff format --check .               # formatting — a separate gate from lint
+python .github/check_doc_links.py   # relative links and heading anchors
 ```
 
-CI runs all three on Python 3.9 through 3.13, then builds the package.
+**There is no CI.** Nothing runs these for you after you push, and no check
+will appear on a pull request to tell you or a reviewer that something broke.
+`pre-commit install` runs all four on every commit, which is the only
+automation there is — install it, and do not `--no-verify` past it.
+
+The project supports Python 3.9 and up. Without a build matrix, syntax newer
+than 3.9 will not be caught before it reaches somebody's long-lived server;
+`requires-python` in `pyproject.toml` is the floor to write against.
 
 ## Architecture in brief
 
@@ -54,7 +62,10 @@ ltm/_version.py       The version, single-sourced
 
 ## Hard rules
 
-These are merge blockers. CI enforces some; a reviewer will enforce the rest.
+These are merge blockers, enforced by a human reviewer reading the diff —
+there is no CI to catch any of them first. That makes the checklist at the
+end of this file the whole gate, so run the commands and report what they
+actually printed.
 
 1. **Never hardcode a directory attribute name outside a flavor preset.** The
    code works in terms of *roles* (`username`, `display_name`, `country`).
@@ -78,7 +89,7 @@ These are merge blockers. CI enforces some; a reviewer will enforce the rest.
    branch rather than exempting it.
 
 4. **Run `ruff format --check .` as well as `ruff check .`.** Formatting is a
-   separate CI gate; lint passing tells you nothing about it.
+   separate gate; lint passing tells you nothing about it.
 
 5. **Guardrails fail safe.** An empty or suspiciously small fetch aborts
    before writing. Never weaken a guardrail to make a scenario pass — a day of
@@ -153,6 +164,7 @@ Only SMTP is stubbed.
 - [ ] `pytest` passes and coverage is still 100%
 - [ ] `ruff check .` is clean
 - [ ] `ruff format --check .` is clean
+- [ ] `python .github/check_doc_links.py` is clean
 - [ ] No gate was loosened to get there (rule 3)
 - [ ] No directory attribute name outside a flavor preset (rule 1)
 - [ ] New behaviour that could be unwanted has a config knob (rule 7)
@@ -162,7 +174,9 @@ Only SMTP is stubbed.
 
 This list is the same one in
 [the pull request template](.github/PULL_REQUEST_TEMPLATE.md). If you are an
-agent, verify each box against real command output rather than asserting it.
+agent, verify each box against real command output rather than asserting it —
+with no CI, an unchecked claim here is the last thing between a mistake and
+`main`.
 
 ## Generated at runtime (not in git)
 

@@ -1,4 +1,4 @@
-"""Fail CI on a broken relative link or anchor in the project's markdown.
+"""Report broken relative links and heading anchors in the project's markdown.
 
 Once the documentation is what review runs on — AGENTS.md sends an agent to a
 specific page and heading before it touches a module — a link that no longer
@@ -7,7 +7,10 @@ dead link falls back on generic assumptions, which is exactly the failure this
 project's written standards exist to prevent.
 
 External URLs are not checked: they fail for reasons that have nothing to do
-with the change under review, and a flaky gate teaches people to ignore it.
+with the change under review, and a check that cries wolf gets ignored.
+
+There is no CI here, so nothing runs this after a push. It runs as a
+pre-commit hook, and belongs in the checklist before opening a pull request.
 
 Usage:  python .github/check_doc_links.py
 """

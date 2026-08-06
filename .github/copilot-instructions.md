@@ -12,10 +12,14 @@ production directories, so wrong output is worse than no output.
 ## Gates
 
 ```bash
-pytest                  # coverage gate fails the run below 100%
+pytest                              # coverage gate fails the run below 100%
 ruff check .
-ruff format --check .   # a separate gate from lint
+ruff format --check .               # a separate gate from lint
+python .github/check_doc_links.py   # relative links and heading anchors
 ```
+
+There is no CI. `pre-commit` runs these on commit and is the only automation;
+otherwise a human reviewer is the only thing enforcing anything below.
 
 ## Hard rules — merge blockers
 
